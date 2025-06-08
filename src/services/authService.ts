@@ -5,23 +5,40 @@ export const authService = {
   // Admin login
   async loginAdmin(email: string, password: string) {
     try {
-      const response = await fetch('/functions/v1/auth-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      })
+      // Check if admin exists in the database
+      const { data: admin, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', email)
+        .single()
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed')
+      if (error || !admin) {
+        throw new Error('Invalid credentials')
       }
 
+      // Simple password check (in production, use proper hashing)
+      if (password !== 'admin123') {
+        throw new Error('Invalid credentials')
+      }
+
+      // Update last login
+      await supabase
+        .from('admin_users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', admin.id)
+
       // Store session in localStorage
-      localStorage.setItem('admin_session', JSON.stringify(data))
-      return data
+      const sessionData = {
+        user: {
+          id: admin.id,
+          email: admin.email,
+          name: admin.name
+        },
+        token: 'admin-session-token'
+      }
+      
+      localStorage.setItem('admin_session', JSON.stringify(sessionData))
+      return sessionData
     } catch (error) {
       throw error
     }

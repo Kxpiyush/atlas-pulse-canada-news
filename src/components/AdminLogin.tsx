@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import { setupDatabase } from '../utils/setupDatabase'
 import Header from './Header'
 
 const AdminLogin = () => {
   const [loginData, setLoginData] = useState({ email: '', password: '' })
+  const [isSettingUp, setIsSettingUp] = useState(false)
   const { login, loading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,6 +18,21 @@ const AdminLogin = () => {
     }
   }
 
+  const handleSetupDatabase = async () => {
+    setIsSettingUp(true)
+    try {
+      const result = await setupDatabase()
+      if (result.success) {
+        alert('Database setup completed! You can now login with admin@atlashype.com / admin123')
+      } else {
+        alert('Database setup failed. Check console for details.')
+      }
+    } catch (error) {
+      alert('Database setup failed. Check console for details.')
+    }
+    setIsSettingUp(false)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -24,6 +41,20 @@ const AdminLogin = () => {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Login</h1>
             <p className="text-gray-600">Access the AtlasHype admin dashboard</p>
+          </div>
+
+          {/* Setup Database Button */}
+          <div className="mb-6 p-4 bg-blue-50 rounded-md">
+            <p className="text-sm text-blue-800 mb-3">
+              First time setup? Initialize your database tables:
+            </p>
+            <button
+              onClick={handleSetupDatabase}
+              disabled={isSettingUp}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              {isSettingUp ? 'Setting up database...' : 'Setup Database'}
+            </button>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -66,7 +97,7 @@ const AdminLogin = () => {
           
           <div className="mt-6 p-4 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-600">
-              <strong>Demo Credentials:</strong><br />
+              <strong>Login Credentials:</strong><br />
               Email: admin@atlashype.com<br />
               Password: admin123
             </p>
