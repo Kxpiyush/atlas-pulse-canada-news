@@ -1,4 +1,3 @@
-
 import { supabase } from '../lib/supabase'
 
 export const setupDatabase = async () => {
@@ -31,11 +30,19 @@ export const setupDatabase = async () => {
         CREATE TABLE IF NOT EXISTS admin_users (
           id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
           email TEXT UNIQUE NOT NULL,
+          password_hash TEXT NOT NULL,
           name TEXT NOT NULL,
           role TEXT DEFAULT 'admin',
           created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
           last_login TIMESTAMP WITH TIME ZONE
         );
+
+        -- Enable Row Level Security
+        ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
+
+        -- Create policy that allows service role to access admin_users
+        CREATE POLICY "Service role can access admin users" ON admin_users
+          FOR ALL USING (true);
       `
     })
 
@@ -45,6 +52,7 @@ export const setupDatabase = async () => {
       .upsert([
         {
           email: 'admin@atlashype.com',
+          password_hash: '$2a$10$rOvHPDNF7RjqmQZ8g7Sk3eY4XQ9JjXvKpEq1mJv7fJ8wF2Q6L4u8G',
           name: 'AtlasHype Admin',
           role: 'admin'
         }
