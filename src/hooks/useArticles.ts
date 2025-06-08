@@ -1,6 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { articleService, Article } from '../services/articleService'
+import { articleService } from '../services/articleService'
+import type { Article } from '../services/articleService'
 import { useToast } from '@/hooks/use-toast'
 
 export const useArticles = () => {

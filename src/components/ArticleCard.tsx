@@ -2,19 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Clock, User } from 'lucide-react';
-
-interface Article {
-  id: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  image: string;
-  author: string;
-  category: string;
-  publishedAt: string;
-  slug: string;
-  tags: string[];
-}
+import type { Article } from '../lib/supabase';
 
 interface ArticleCardProps {
   article: Article;
@@ -30,12 +18,15 @@ const ArticleCard = ({ article, variant = 'default' }: ArticleCardProps) => {
     });
   };
 
+  // Use published_at if available, otherwise fall back to created_at
+  const displayDate = article.published_at || article.created_at;
+
   if (variant === 'featured') {
     return (
       <Link to={`/news/${article.slug}`} className="block group">
         <div className="relative overflow-hidden rounded-lg shadow-lg">
           <img 
-            src={`https://images.unsplash.com/${article.image}?w=800&h=400&fit=crop`}
+            src={article.image ? `https://images.unsplash.com/${article.image}?w=800&h=400&fit=crop` : `https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=400&fit=crop`}
             alt={article.title}
             className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -55,7 +46,7 @@ const ArticleCard = ({ article, variant = 'default' }: ArticleCardProps) => {
               </div>
               <div className="flex items-center space-x-1">
                 <Clock size={14} />
-                <span>{formatDate(article.publishedAt)}</span>
+                <span>{formatDate(displayDate)}</span>
               </div>
             </div>
           </div>
@@ -69,7 +60,7 @@ const ArticleCard = ({ article, variant = 'default' }: ArticleCardProps) => {
       <Link to={`/news/${article.slug}`} className="block group">
         <div className="flex space-x-3">
           <img 
-            src={`https://images.unsplash.com/${article.image}?w=150&h=100&fit=crop`}
+            src={article.image ? `https://images.unsplash.com/${article.image}?w=150&h=100&fit=crop` : `https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=150&h=100&fit=crop`}
             alt={article.title}
             className="w-20 h-16 object-cover rounded"
           />
@@ -78,7 +69,7 @@ const ArticleCard = ({ article, variant = 'default' }: ArticleCardProps) => {
               {article.title}
             </h3>
             <div className="flex items-center text-xs text-gray-500 mt-1 space-x-2">
-              <span>{formatDate(article.publishedAt)}</span>
+              <span>{formatDate(displayDate)}</span>
             </div>
           </div>
         </div>
@@ -90,7 +81,7 @@ const ArticleCard = ({ article, variant = 'default' }: ArticleCardProps) => {
     <Link to={`/news/${article.slug}`} className="block group">
       <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
         <img 
-          src={`https://images.unsplash.com/${article.image}?w=400&h=250&fit=crop`}
+          src={article.image ? `https://images.unsplash.com/${article.image}?w=400&h=250&fit=crop` : `https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=400&h=250&fit=crop`}
           alt={article.title}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -109,7 +100,7 @@ const ArticleCard = ({ article, variant = 'default' }: ArticleCardProps) => {
             </div>
             <div className="flex items-center space-x-1">
               <Clock size={14} />
-              <span>{formatDate(article.publishedAt)}</span>
+              <span>{formatDate(displayDate)}</span>
             </div>
           </div>
         </div>

@@ -2,11 +2,12 @@
 import React, { useState } from 'react'
 import { useCreateArticle } from '../hooks/useArticles'
 import { articleService } from '../services/articleService'
+import type { Article } from '../lib/supabase'
 
 const ArticleForm = () => {
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Local',
+    category: 'Local' as Article['category'],
     author: '',
     excerpt: '',
     content: '',
@@ -69,7 +70,7 @@ const ArticleForm = () => {
             <label className="block text-sm font-medium mb-2">Category</label>
             <select 
               value={formData.category}
-              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              onChange={(e) => setFormData({...formData, category: e.target.value as Article['category']})}
               className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
             >
               <option value="Local">Local</option>

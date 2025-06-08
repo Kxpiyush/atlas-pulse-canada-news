@@ -1,5 +1,9 @@
 
-import { supabase, Article } from '../lib/supabase'
+import { supabase } from '../lib/supabase'
+
+// Import and re-export the Article type from supabase
+export type { Article } from '../lib/supabase'
+import type { Article } from '../lib/supabase'
 
 export const articleService = {
   // Get all published articles
