@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { setupDatabase } from '../utils/setupDatabase'
@@ -7,14 +8,17 @@ const AdminLogin = () => {
   const [loginData, setLoginData] = useState({ email: 'kxpiyush@gmail.com', password: '' })
   const [isSettingUp, setIsSettingUp] = useState(false)
   const [setupMessage, setSetupMessage] = useState('')
+  const [loginError, setLoginError] = useState('')
   const { login, loading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setLoginError('')
     try {
       await login(loginData.email, loginData.password)
     } catch (error) {
       console.error('Login failed:', error)
+      setLoginError(error.message || 'Login failed')
     }
   }
 
@@ -91,6 +95,12 @@ const AdminLogin = () => {
                 required
               />
             </div>
+
+            {loginError && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600">{loginError}</p>
+              </div>
+            )}
             
             <button
               type="submit"

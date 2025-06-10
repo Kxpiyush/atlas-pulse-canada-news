@@ -1,9 +1,25 @@
+
 import { supabase } from '../lib/supabase'
 
 export const authService = {
   // Admin login - simplified for demo purposes
   async loginAdmin(email: string, password: string) {
     try {
+      console.log('Attempting login with email:', email)
+      
+      // First test the Supabase connection
+      const { data: testConnection, error: connectionError } = await supabase
+        .from('admin_users')
+        .select('count')
+        .limit(1)
+
+      if (connectionError) {
+        console.error('Supabase connection failed:', connectionError)
+        throw new Error('Database connection failed. Please check Supabase configuration.')
+      }
+
+      console.log('Supabase connection successful')
+
       // Check if admin exists in the database
       const { data: admin, error } = await supabase
         .from('admin_users')
@@ -11,14 +27,17 @@ export const authService = {
         .eq('email', email)
         .single()
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Database error:', error)
-        throw new Error('Invalid credentials')
+        throw new Error('Database query failed: ' + error.message)
       }
 
       if (!admin) {
-        throw new Error('Invalid credentials')
+        console.log('Admin user not found for email:', email)
+        throw new Error('Invalid credentials - user not found')
       }
+
+      console.log('Admin user found:', admin)
 
       // Simple password validation (in production, use proper authentication)
       const validCredentials = [
@@ -31,8 +50,11 @@ export const authService = {
       )
 
       if (!isValid) {
-        throw new Error('Invalid credentials')
+        console.log('Invalid password for email:', email)
+        throw new Error('Invalid credentials - wrong password')
       }
+
+      console.log('Login successful for:', email)
 
       // Store session in localStorage (simplified for demo)
       const sessionData = {
