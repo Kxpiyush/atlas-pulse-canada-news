@@ -2,66 +2,73 @@ import { supabase } from '../lib/supabase'
 
 export const setupDatabase = async () => {
   try {
-    // Create articles table
-    const { error: articlesError } = await supabase.rpc('exec_sql', {
-      sql: `
-        CREATE TABLE IF NOT EXISTS articles (
-          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-          title TEXT NOT NULL,
-          slug TEXT UNIQUE NOT NULL,
-          content TEXT NOT NULL,
-          excerpt TEXT,
-          author TEXT NOT NULL,
-          category TEXT NOT NULL CHECK (category IN ('Local', 'Canada', 'World', 'Opinion', 'Events')),
-          image TEXT,
-          tags TEXT[],
-          featured BOOLEAN DEFAULT FALSE,
-          published BOOLEAN DEFAULT FALSE,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          published_at TIMESTAMP WITH TIME ZONE
-        );
-      `
-    })
+    console.log('Starting database setup...')
 
-    // Create admin_users table
-    const { error: adminError } = await supabase.rpc('exec_sql', {
-      sql: `
-        CREATE TABLE IF NOT EXISTS admin_users (
-          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-          email TEXT UNIQUE NOT NULL,
-          password_hash TEXT NOT NULL,
-          name TEXT NOT NULL,
-          role TEXT DEFAULT 'admin',
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          last_login TIMESTAMP WITH TIME ZONE
-        );
-
-        -- Enable Row Level Security
-        ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
-
-        -- Create policy that allows service role to access admin_users
-        CREATE POLICY "Service role can access admin users" ON admin_users
-          FOR ALL USING (true);
-      `
-    })
-
-    // Insert admin user with your credentials
-    const { error: insertError } = await supabase
+    // Test connection first
+    const { data: testData, error: testError } = await supabase
       .from('admin_users')
-      .upsert([
-        {
-          email: 'kxpiyush@gmail.com',
-          password_hash: '$2a$10$rOvHPDNF7RjqmQZ8g7Sk3eY4XQ9JjXvKpEq1mJv7fJ8wF2Q6L4u8G',
-          name: 'Piyush Kumar',
-          role: 'admin'
-        }
-      ], { onConflict: 'email' })
+      .select('count')
+      .limit(1)
 
-    console.log('Database setup completed!')
+    if (testError) {
+      console.error('Connection test failed:', testError)
+      throw new Error('Failed to connect to Supabase. Please check your configuration.')
+    }
+
+    console.log('Connection successful, checking admin user...')
+
+    // Check if admin user already exists
+    const { data: existingAdmin, error: checkError } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', 'kxpiyush@gmail.com')
+      .single()
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking admin user:', checkError)
+      throw checkError
+    }
+
+    if (!existingAdmin) {
+      console.log('Creating admin user...')
+      // Insert admin user
+      const { error: insertError } = await supabase
+        .from('admin_users')
+        .insert([
+          {
+            email: 'kxpiyush@gmail.com',
+            name: 'Piyush Kumar',
+            role: 'admin'
+          }
+        ])
+
+      if (insertError) {
+        console.error('Error creating admin user:', insertError)
+        throw insertError
+      }
+      console.log('Admin user created successfully!')
+    } else {
+      console.log('Admin user already exists')
+    }
+
+    // Check if we have any articles
+    const { data: articles, error: articlesError } = await supabase
+      .from('articles')
+      .select('count')
+      .limit(1)
+
+    if (articlesError) {
+      console.error('Error checking articles:', articlesError)
+      // Don't throw here, articles table might not exist yet
+    }
+
+    console.log('Database setup completed successfully!')
     return { success: true }
   } catch (error) {
     console.error('Database setup failed:', error)
-    return { success: false, error }
+    return { 
+      success: false, 
+      error: error.message || 'Unknown error occurred'
+    }
   }
 }

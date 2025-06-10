@@ -4,8 +4,9 @@ import { setupDatabase } from '../utils/setupDatabase'
 import Header from './Header'
 
 const AdminLogin = () => {
-  const [loginData, setLoginData] = useState({ email: '', password: '' })
+  const [loginData, setLoginData] = useState({ email: 'kxpiyush@gmail.com', password: '' })
   const [isSettingUp, setIsSettingUp] = useState(false)
+  const [setupMessage, setSetupMessage] = useState('')
   const { login, loading } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -13,21 +14,22 @@ const AdminLogin = () => {
     try {
       await login(loginData.email, loginData.password)
     } catch (error) {
-      // Error is handled in the hook
+      console.error('Login failed:', error)
     }
   }
 
   const handleSetupDatabase = async () => {
     setIsSettingUp(true)
+    setSetupMessage('')
     try {
       const result = await setupDatabase()
       if (result.success) {
-        alert('Database setup completed! You can now login with your credentials.')
+        setSetupMessage('Database setup completed successfully! You can now login.')
       } else {
-        alert('Database setup failed. Check console for details.')
+        setSetupMessage(`Database setup failed: ${result.error}`)
       }
     } catch (error) {
-      alert('Database setup failed. Check console for details.')
+      setSetupMessage(`Database setup failed: ${error.message}`)
     }
     setIsSettingUp(false)
   }
@@ -45,7 +47,7 @@ const AdminLogin = () => {
           {/* Setup Database Button */}
           <div className="mb-6 p-4 bg-blue-50 rounded-md">
             <p className="text-sm text-blue-800 mb-3">
-              First time setup? Initialize your database tables:
+              First time setup? Initialize your database:
             </p>
             <button
               onClick={handleSetupDatabase}
@@ -54,6 +56,11 @@ const AdminLogin = () => {
             >
               {isSettingUp ? 'Setting up database...' : 'Setup Database'}
             </button>
+            {setupMessage && (
+              <p className={`text-sm mt-2 ${setupMessage.includes('failed') ? 'text-red-600' : 'text-green-600'}`}>
+                {setupMessage}
+              </p>
+            )}
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -96,7 +103,7 @@ const AdminLogin = () => {
           
           <div className="mt-6 p-4 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-600">
-              <strong>Admin Credentials:</strong><br />
+              <strong>Your Admin Credentials:</strong><br />
               Email: kxpiyush@gmail.com<br />
               Password: Anish28$
             </p>

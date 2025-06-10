@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 
 export const authService = {
-  // Admin login
+  // Admin login - simplified for demo purposes
   async loginAdmin(email: string, password: string) {
     try {
       // Check if admin exists in the database
@@ -11,58 +11,82 @@ export const authService = {
         .eq('email', email)
         .single()
 
-      if (error || !admin) {
+      if (error) {
+        console.error('Database error:', error)
         throw new Error('Invalid credentials')
       }
 
-      // Check password based on email
-      let isValidPassword = false
-      if (email === 'kxpiyush@gmail.com' && password === 'Anish28$') {
-        isValidPassword = true
-      } else if (email === 'admin@atlashype.com' && password === 'admin123') {
-        isValidPassword = true
-      }
-
-      if (!isValidPassword) {
+      if (!admin) {
         throw new Error('Invalid credentials')
       }
 
-      // Update last login
-      await supabase
-        .from('admin_users')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', admin.id)
+      // Simple password validation (in production, use proper authentication)
+      const validCredentials = [
+        { email: 'kxpiyush@gmail.com', password: 'Anish28$' },
+        { email: 'admin@atlashype.com', password: 'admin123' }
+      ]
 
-      // Store session in localStorage
+      const isValid = validCredentials.some(
+        cred => cred.email === email && cred.password === password
+      )
+
+      if (!isValid) {
+        throw new Error('Invalid credentials')
+      }
+
+      // Store session in localStorage (simplified for demo)
       const sessionData = {
         user: {
           id: admin.id,
           email: admin.email,
-          name: admin.name
+          name: admin.name,
+          role: admin.role
         },
-        token: 'admin-session-token'
+        token: 'admin-session-token',
+        timestamp: Date.now()
       }
       
       localStorage.setItem('admin_session', JSON.stringify(sessionData))
       return sessionData
     } catch (error) {
+      console.error('Login error:', error)
       throw error
     }
   },
 
   // Check if admin is logged in
   isLoggedIn(): boolean {
-    const session = localStorage.getItem('admin_session')
-    return !!session
+    try {
+      const session = localStorage.getItem('admin_session')
+      if (!session) return false
+
+      const sessionData = JSON.parse(session)
+      // Check if session is less than 24 hours old
+      const isValid = sessionData.timestamp && (Date.now() - sessionData.timestamp) < 24 * 60 * 60 * 1000
+      
+      if (!isValid) {
+        localStorage.removeItem('admin_session')
+        return false
+      }
+
+      return true
+    } catch {
+      return false
+    }
   },
 
   // Get current admin user
   getCurrentUser() {
-    const session = localStorage.getItem('admin_session')
-    if (session) {
-      return JSON.parse(session).user
+    try {
+      const session = localStorage.getItem('admin_session')
+      if (session) {
+        const sessionData = JSON.parse(session)
+        return sessionData.user
+      }
+      return null
+    } catch {
+      return null
     }
-    return null
   },
 
   // Logout admin
