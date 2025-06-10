@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import { setupDatabase } from '../utils/setupDatabase'
@@ -23,7 +22,7 @@ const AdminLogin = () => {
     try {
       const result = await setupDatabase()
       if (result.success) {
-        alert('Database setup completed! You can now login with admin@atlashype.com / admin123')
+        alert('Database setup completed! You can now login with your credentials.')
       } else {
         alert('Database setup failed. Check console for details.')
       }
@@ -67,7 +66,7 @@ const AdminLogin = () => {
                 value={loginData.email}
                 onChange={(e) => setLoginData({...loginData, email: e.target.value})}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                placeholder="admin@atlashype.com"
+                placeholder="Enter your email"
                 required
               />
             </div>
@@ -97,9 +96,9 @@ const AdminLogin = () => {
           
           <div className="mt-6 p-4 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-600">
-              <strong>Login Credentials:</strong><br />
-              Email: admin@atlashype.com<br />
-              Password: admin123
+              <strong>Admin Credentials:</strong><br />
+              Email: kxpiyush@gmail.com<br />
+              Password: Anish28$
             </p>
           </div>
         </div>

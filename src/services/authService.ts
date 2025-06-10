@@ -1,4 +1,3 @@
-
 import { supabase } from '../lib/supabase'
 
 export const authService = {
@@ -16,8 +15,15 @@ export const authService = {
         throw new Error('Invalid credentials')
       }
 
-      // Simple password check (in production, use proper hashing)
-      if (password !== 'admin123') {
+      // Check password based on email
+      let isValidPassword = false
+      if (email === 'kxpiyush@gmail.com' && password === 'Anish28$') {
+        isValidPassword = true
+      } else if (email === 'admin@atlashype.com' && password === 'admin123') {
+        isValidPassword = true
+      }
+
+      if (!isValidPassword) {
         throw new Error('Invalid credentials')
       }
 

@@ -46,14 +46,14 @@ export const setupDatabase = async () => {
       `
     })
 
-    // Insert default admin user
+    // Insert admin user with your credentials
     const { error: insertError } = await supabase
       .from('admin_users')
       .upsert([
         {
-          email: 'admin@atlashype.com',
+          email: 'kxpiyush@gmail.com',
           password_hash: '$2a$10$rOvHPDNF7RjqmQZ8g7Sk3eY4XQ9JjXvKpEq1mJv7fJ8wF2Q6L4u8G',
-          name: 'AtlasHype Admin',
+          name: 'Piyush Kumar',
           role: 'admin'
         }
       ], { onConflict: 'email' })
