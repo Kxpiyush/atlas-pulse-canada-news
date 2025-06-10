@@ -28,7 +28,7 @@ const AdminLogin = () => {
     try {
       const result = await setupDatabase()
       if (result.success) {
-        setSetupMessage('Database setup completed successfully! You can now login.')
+        setSetupMessage(result.message || 'Database setup completed successfully! You can now login.')
       } else {
         setSetupMessage(`Database setup failed: ${result.error}`)
       }
@@ -48,17 +48,18 @@ const AdminLogin = () => {
             <p className="text-gray-600">Access the AtlasHype admin dashboard</p>
           </div>
 
-          {/* Setup Database Button */}
-          <div className="mb-6 p-4 bg-blue-50 rounded-md">
-            <p className="text-sm text-blue-800 mb-3">
-              First time setup? Initialize your database:
+          {/* Info about RLS issue */}
+          <div className="mb-6 p-4 bg-yellow-50 rounded-md">
+            <p className="text-sm text-yellow-800 mb-3">
+              <strong>Note:</strong> Using fallback authentication due to Supabase RLS policy configuration. 
+              You can login directly with your credentials.
             </p>
             <button
               onClick={handleSetupDatabase}
               disabled={isSettingUp}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 transition-colors disabled:opacity-50"
             >
-              {isSettingUp ? 'Setting up database...' : 'Setup Database'}
+              {isSettingUp ? 'Checking system...' : 'Check System Status'}
             </button>
             {setupMessage && (
               <p className={`text-sm mt-2 ${setupMessage.includes('failed') ? 'text-red-600' : 'text-green-600'}`}>
